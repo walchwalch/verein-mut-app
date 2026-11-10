@@ -1,6 +1,10 @@
 # Erstellt App-Store-Screenshots von der live geschalteten Web-App (spenden.mutig.app) und legt sie unter store/screenshots-* ab.
 name: Store-Screenshots erstellen
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/screenshots.yml', 'dev/shots.mjs']
 permissions:
   contents: write
 jobs:
@@ -11,6 +15,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci
+      - name: Warten, bis die neueste Version online ist
+        run: sleep 150
       - name: Screenshots 6,9 Zoll (1320 x 2868)
         run: CHROME=$(which google-chrome) node dev/shots.mjs https://spenden.mutig.app/ store/screenshots-6.9 440 956 3
       - name: Screenshots 6,5 Zoll (1284 x 2778)
