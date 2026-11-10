@@ -241,7 +241,8 @@ async function eventFromHtml(url) {
   const allDay = !m[4];
   const start = viennaToISO(day + (allDay ? 'T000000' : `T${p2(m[4])}${m[5]}00`));
   const end = viennaToISO(day + (allDay ? 'T235900' : `T${p2(m[6])}${m[7]}00`));
-  const location = clean($('[class*="venue"] , [class*="location"]').first().text()).split('\n')[0] || '';
+  let location = clean($('[class*="venue"] , [class*="location"]').first().text()).split('\n')[0] || '';
+  if (location.length < 6) location = '';
   return { start, end, allDay, location };
 }
 async function loadEvents(prev) {

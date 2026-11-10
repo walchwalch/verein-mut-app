@@ -241,7 +241,7 @@ function projectCard(p, row = false) {
 function eventCard(e) {
   const d = new Date(e.start);
   return `<a class="card row" href="#/termin/${encodeURIComponent(e.id)}"><div class="date-box" aria-hidden="true"><span>${d.toLocaleDateString('de-AT', { weekday: 'short', timeZone: 'Europe/Vienna' })}</span><b>${d.toLocaleDateString('de-AT', { day: 'numeric', timeZone: 'Europe/Vienna' }).replace('.', '')}</b><span>${d.toLocaleDateString('de-AT', { month: 'short', timeZone: 'Europe/Vienna' }).replace('.', '')}</span></div>
-    <div class="body"><h3>${esc(e.title)}</h3><p>${e.allDay ? 'Ganztägig' : fmtTime(e.start) + ' – ' + fmtTime(e.end) + ' Uhr'}${e.location ? ' · ' + esc(e.location.split(',')[0]) : ''}</p></div></a>`;
+    <div class="body"><h3>${esc(e.title)}</h3><p>${e.allDay ? 'Ganztägig' : fmtTime(e.start) + (e.end > e.start ? ' – ' + fmtTime(e.end) : '') + ' Uhr'}${e.location ? ' · ' + esc(e.location.split(',')[0]) : ''}</p></div></a>`;
 }
 function blocksHtml(blocks = []) {
   let h = '', inList = false;
@@ -339,7 +339,7 @@ function pageEvent(id) {
   header({ title: 'Termin', back: true, actions: actBtn('bookmark', 'bookmark', 'Merken', S.bookmarks.has(e.id)) + actBtn('share', 'share', 'Teilen') });
   const sameDay = fmtDate(e.start) === fmtDate(e.end);
   const when = e.allDay ? fmtDate(e.start, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + ' (ganztägig)'
-    : fmtDate(e.start, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '<br>' + fmtTime(e.start) + ' – ' + (sameDay ? '' : fmtDate(e.end) + ', ') + fmtTime(e.end) + ' Uhr';
+    : fmtDate(e.start, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '<br>' + fmtTime(e.start) + (e.end > e.start ? ' – ' + (sameDay ? '' : fmtDate(e.end) + ', ') + fmtTime(e.end) : '') + ' Uhr';
   const linked = (e.projects || []).map(project).filter(Boolean);
   main.innerHTML = `
     ${e.image ? `<div class="hero">${imgTag(e.image, e.title)}</div>` : ''}

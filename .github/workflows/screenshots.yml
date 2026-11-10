@@ -1,3 +1,4 @@
+# (Läuft auch bei Änderungen an dieser Datei.)
 # Erstellt App-Store-Screenshots von der live geschalteten Web-App (spenden.mutig.app) und legt sie unter store/screenshots-* ab.
 name: Store-Screenshots erstellen
 on:

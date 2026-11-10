@@ -59,6 +59,6 @@ export const KEYWORD_TO_AREA = [
 ];
 
 // Wörter, die beim automatischen Verknüpfen Beitrag <-> Projekt ignoriert werden
-export const STOPWORDS = new Set(['projekt', 'verein', 'kostenlos', 'kostenloser', 'kostenlose', 'angebot', 'frauen', 'netzwerk', 'hilfe', 'salzburg', 'wien', 'yourself', 'mitmachen', 'helfen', 'gratis', 'sozial', 'kinder', 'familien', 'lebensmittel']);
+export const STOPWORDS = new Set(['projekt', 'verein', 'kostenlos', 'kostenloser', 'kostenlose', 'angebot', 'frauen', 'netzwerk', 'hilfe', 'salzburg', 'wien', 'yourself', 'mitmachen', 'helfen', 'gratis', 'sozial', 'kinder', 'familien', 'lebensmittel', 'unsere', 'unser', 'unseren', 'unserem', 'unserer', 'gemeinsam', 'menschen', 'charity', 'wochen', 'zeiten', 'familie']);
 
 export const LIMITS = { posts: 40, social: 20, events: 40, blocks: 45, textChars: 6000 };
