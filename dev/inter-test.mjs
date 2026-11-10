@@ -1,0 +1,26 @@
+import { chromium } from 'playwright-core';
+const b = await chromium.launch({ executablePath: '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'] });
+const p = await ctx.newPage(); const errs = []; p.on('pageerror', e => errs.push(e.message));
+const U = 'http://localhost:8765/';
+await p.goto(U); await p.waitForTimeout(1200);
+const n0 = await p.locator('#feedlist .card').count();
+await p.click('[data-ch="instagram"]'); await p.waitForTimeout(300);
+const n1 = await p.locator('#feedlist .card').count();
+await p.click('[data-ch="alle"]'); await p.fill('#q', 'reittherapie'); await p.waitForTimeout(600);
+const n2 = await p.locator('#feedlist .card').count();
+await p.goto(U + '#/projekt/reittherapie'); await p.waitForTimeout(700);
+await p.click('[data-act="bookmark"]'); const pressed = await p.getAttribute('[data-act="bookmark"]', 'aria-pressed');
+await p.click('#back'); await p.waitForTimeout(500); const afterBack = await p.evaluate(() => location.hash);
+await p.goto(U + '#/merkliste'); await p.waitForTimeout(500); const bm = await p.locator('main .card').count();
+await p.goto(U + '#/termin/e-1'); await p.waitForTimeout(500);
+const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-act="calendar"]')]);
+const ics = await (await dl.createReadStream()).toArray().then(a => Buffer.concat(a).toString());
+await p.click('[data-act="share"]'); await p.waitForTimeout(400); const toast = await p.textContent('#toast');
+await p.goto(U + '#/mehr'); await p.waitForTimeout(400); await p.click('label:has(#sw-large)'); const large = await p.evaluate(() => document.documentElement.classList.contains('large'));
+await p.reload(); await p.waitForTimeout(800); const largeAfter = await p.evaluate(() => document.documentElement.classList.contains('large'));
+// offline
+await ctx.setOffline(true); await p.goto(U + '#/aktuell').catch(()=>{}); await p.waitForTimeout(1500);
+const ban = await p.textContent('#banner').catch(()=>'-'); const cards = await p.locator('#feedlist .card').count().catch(()=>0);
+console.log({ n0, n1, n2, pressed, afterBack, bm, ics: ics.split('\r\n').filter(l => /DTSTART|SUMMARY/.test(l)), toast, large, largeAfter, offlineBanner: ban, offlineCards: cards, errs });
+await b.close();

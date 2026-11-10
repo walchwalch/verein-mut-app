@@ -1,0 +1,24 @@
+// Screenshots der App (für Tests und App-Store). Aufruf: node dev/shots.mjs <url> <ordner> [breite höhe faktor]
+import { chromium } from 'playwright-core';
+import fs from 'node:fs/promises';
+const [url, dir, w = 390, h = 844, f = 2] = process.argv.slice(2);
+await fs.mkdir(dir, { recursive: true });
+const browser = await chromium.launch({ executablePath: process.env.CHROME || '/usr/bin/google-chrome', args: ['--no-sandbox'] });
+const page = await browser.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: +f, isMobile: true, hasTouch: true, locale: 'de-AT', timezoneId: 'Europe/Vienna' });
+const errors = []; page.on('pageerror', e => errors.push(e.message)); page.on('console', m => m.type() === 'error' && errors.push(m.text()));
+const go = async (hash, name, fn) => { await page.goto(url + '#' + hash); await page.waitForTimeout(1600); if (fn) await fn(); await page.screenshot({ path: `${dir}/${name}.png` }); };
+await page.goto(url); await page.evaluate(() => { localStorage.clear(); }); await page.waitForTimeout(500);
+await go('/aktuell', '1-aktuell');
+const firstProject = await page.evaluate(async () => (await (await fetch('data/feed.json')).json()).projects.find(p => p.image && p.blocks.length > 3)?.slug);
+await go('/projekte', '2-projekte');
+await go('/projekt/' + firstProject, '3-projekt');
+await go('/termine', '4-termine');
+const firstEvent = await page.evaluate(async () => (await (await fetch('data/feed.json')).json()).events[0]?.id);
+if (firstEvent) await go('/termin/' + firstEvent, '5-termin');
+await go('/mitmachen', '6-mitmachen');
+await go('/mehr', '7-mehr');
+const post = await page.evaluate(async () => (await (await fetch('data/feed.json')).json()).posts[0]?.id);
+await go('/beitrag/' + post, '8-beitrag');
+await go('/datenschutz', '9-datenschutz');
+console.log('Fehler:', errors.length ? errors : 'keine');
+await browser.close();

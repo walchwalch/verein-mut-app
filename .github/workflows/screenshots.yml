@@ -1,0 +1,22 @@
+# Erstellt App-Store-Screenshots von der live geschalteten Web-App (spenden.mutig.app) und legt sie unter store/screenshots-* ab.
+name: Store-Screenshots erstellen
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - name: Screenshots 6,9 Zoll (1320 x 2868)
+        run: CHROME=$(which google-chrome) node dev/shots.mjs https://spenden.mutig.app/ store/screenshots-6.9 440 956 3
+      - name: Screenshots 6,5 Zoll (1284 x 2778)
+        run: CHROME=$(which google-chrome) node dev/shots.mjs https://spenden.mutig.app/ store/screenshots-6.5 428 926 3
+      - name: Einchecken
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add store && git commit -m "Store-Screenshots aktualisiert" && git push || echo "keine Änderungen"

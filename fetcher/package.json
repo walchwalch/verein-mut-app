@@ -1,0 +1,13 @@
+{
+  "name": "verein-mut-feed",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch": "node fetch.mjs ../dist"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "fast-xml-parser": "^5.12.0",
+    "sharp": "^0.35.5"
+  }
+}

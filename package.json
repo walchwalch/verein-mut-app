@@ -1,0 +1,30 @@
+{
+  "name": "verein-mut-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gratis-App des Verein M.U.T. – Projekte, Neuigkeiten, Termine",
+  "scripts": {
+    "brand": "node scripts/brand.mjs",
+    "site": "node scripts/build-site.mjs dist",
+    "snapshot": "node scripts/snapshot.mjs"
+  },
+  "dependencies": {
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/app-launcher": "^7.0.4",
+    "@capacitor/background-runner": "^2.3.1",
+    "@capacitor/browser": "^7.0.5",
+    "@capacitor/cli": "^7.6.10",
+    "@capacitor/core": "^7.6.10",
+    "@capacitor/ios": "^7.6.10",
+    "@capacitor/local-notifications": "^7.0.7",
+    "@capacitor/preferences": "^7.0.4",
+    "@capacitor/share": "^7.0.4",
+    "@capacitor/splash-screen": "^7.0.5",
+    "@capacitor/status-bar": "^7.0.6",
+    "@ebarooni/capacitor-calendar": "^7.5.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.0",
+    "sharp": "^0.35.5"
+  }
+}

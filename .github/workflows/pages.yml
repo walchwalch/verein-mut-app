@@ -1,0 +1,55 @@
+# Holt alle 2 Stunden neue Inhalte (Homepage, YouTube, Facebook/Instagram, TikTok)
+# und veröffentlicht Web-App + feed.json + Datenschutz-/Supportseite auf GitHub Pages (spenden.mutig.app).
+# Optionale Secrets (Settings → Secrets and variables → Actions):
+#   META_PAGE_TOKEN   – dauerhafter Seiten-Zugriffstoken der Facebook-Seite (für Facebook + Instagram)
+#   META_PAGE_ID      – ID der Facebook-Seite (optional, wird sonst aus dem Token ermittelt)
+#   IG_USER_ID        – ID des Instagram-Business-Kontos (optional, wird sonst ermittelt)
+#   TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, TIKTOK_REFRESH_TOKEN – nur falls ein TikTok-Kanal angebunden wird
+name: Inhalte abholen und Web-App veröffentlichen
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['www/**', 'site/**', 'fetcher/**', 'scripts/**', '.github/workflows/pages.yml']
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Werkzeuge installieren
+        run: npm ci && cd fetcher && npm ci
+      - name: Logo und Icons erzeugen
+        run: node scripts/brand.mjs
+      - name: Website zusammenstellen
+        run: node scripts/build-site.mjs dist
+      - name: Inhalte abholen
+        env:
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
+        run: cd fetcher && node fetch.mjs ../dist
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

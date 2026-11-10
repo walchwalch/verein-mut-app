@@ -1,0 +1,28 @@
+{
+  "appId": "at.vereinmut.app",
+  "appName": "Verein M.U.T.",
+  "webDir": "www",
+  "backgroundColor": "#006826",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f5f7f4"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "backgroundColor": "#239747",
+      "showSpinner": false
+    },
+    "LocalNotifications": {
+      "iconColor": "#239747"
+    },
+    "BackgroundRunner": {
+      "label": "at.vereinmut.app.check",
+      "src": "runners/background.js",
+      "event": "checkNews",
+      "repeat": true,
+      "interval": 180,
+      "autoStart": true
+    }
+  }
+}
