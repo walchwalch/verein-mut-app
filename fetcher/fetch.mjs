@@ -254,6 +254,7 @@ async function loadEvents(prev) {
     const old = prevById.get(id);
     let start, end, allDay, location;
     if (old && old.modified === e.modified_gmt) ({ start, end, allDay, location } = old);
+    if (location && location.length < 6) location = '';
     else {
       try {
         const ics = await getText(e.link + (e.link.includes('?') ? '&' : '?') + 'ical=1');
