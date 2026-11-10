@@ -229,6 +229,21 @@ function parseTime(f) {
   if (/Z$/.test(f.value)) { const v = f.value; return { iso: new Date(`${v.slice(0, 4)}-${v.slice(4, 6)}-${v.slice(6, 8)}T${v.slice(9, 11)}:${v.slice(11, 13)}:00Z`).toISOString(), allDay: false }; }
   return { iso: viennaToISO(f.value), allDay: false };
 }
+
+const MONTHS = { jaenner: 1, januar: 1, februar: 2, maerz: 3, april: 4, mai: 5, juni: 6, juli: 7, august: 8, september: 9, oktober: 10, november: 11, dezember: 12 };
+async function eventFromHtml(url) {
+  const $ = cheerio.load(await getText(url));
+  const txt = clean($('.evge-meta-date-summary').first().text() || $('main').text());
+  const m = txt.match(/(\d{1,2})\.\s*([A-Za-zÄäÖöÜü]+)\s+(\d{4})(?:[^\d]{1,8}(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2}))?/);
+  if (!m) throw new Error('kein Datum auf der Seite');
+  const mo = MONTHS[norm(m[2]).trim()]; if (!mo) throw new Error('Monat unbekannt: ' + m[2]);
+  const p2 = n => String(n).padStart(2, '0'); const day = `${m[3]}${p2(mo)}${p2(m[1])}`;
+  const allDay = !m[4];
+  const start = viennaToISO(day + (allDay ? 'T000000' : `T${p2(m[4])}${m[5]}00`));
+  const end = viennaToISO(day + (allDay ? 'T235900' : `T${p2(m[6])}${m[7]}00`));
+  const location = clean($('[class*="venue"] , [class*="location"]').first().text()).split('\n')[0] || '';
+  return { start, end, allDay, location };
+}
 async function loadEvents(prev) {
   const list = await getJSON(`${SITE}/wp-json/wp/v2/evge_event?per_page=${LIMITS.events}&_embed=wp:featuredmedia`);
   const prevById = new Map((prev?.events || []).map(e => [e.id, e]));
@@ -245,7 +260,11 @@ async function loadEvents(prev) {
         if (!s) return null;
         start = s.iso; allDay = s.allDay; end = en?.iso || start;
         location = icsField(ics, 'LOCATION')?.value || '';
-      } catch (err) { warn('Termin', e.id, err.message); return null; }
+      } catch (err) {
+        // Ersatz: Datum/Ort aus der Termin-Seite lesen (z. B. bei Serienterminen ohne iCal)
+        try { ({ start, end, allDay, location } = await eventFromHtml(e.link)); }
+        catch (err2) { warn('Termin', e.id, err.message, '/', err2.message); return null; }
+      }
     }
     if (new Date(end).getTime() < now - 6 * 3600e3) return null;
     const blocks = await mirrorBlocks(blocksFromHtml(e.content.rendered), 3);
@@ -367,4 +386,4 @@ async function main() {
 }
 export { blocksFromHtml, viennaToISO, parseTime, icsField };
 import { pathToFileURL } from 'node:url';
-if (import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(e => { console.error(e); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch(e => { console.error(e); process.exit(1); });
